@@ -1,0 +1,233 @@
+\documentclass[11pt]{article}
+\usepackage[spanish]{babel}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[margin=1in]{geometry}
+\usepackage{float}
+\setlength{\parindent}{0pt}
+
+\title{Actividad grupal: Problemas de contorno unidimensionales, métodos de diferencias finitas}
+\author{Nombre del estudiante}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Planteamiento del problema}
+
+Consideramos el problema de contorno no lineal:
+\[
+y'' - x y y' + 3 y^2 = 6x, \quad x \in [0,1],
+\]
+con las condiciones de contorno mixtas:
+\[
+3y(0) - 2y'(0) = 0= \alpha, \quad 2y(1) - \frac{1}{3}y'(1) = 1 = \beta.
+\]
+
+\section{Discretización por diferencias finitas}
+Se divide el intervalo $[0, 1]$ en $N = 100$ subintervalos, generando $101$ nodos $x_i = ih$, con $h = 1/N+1$. Se discretiza en los nodos interiores $i = 1, 2, \dots, 99$:
+Aplicamos diferencias finitas centradas, se tiene:
+
+\[
+\frac{y_{i+1} - 2y_i + y_{i-1}}{h^2} = f\left(x_i, y_i, \frac{y_{i+1} - y_{i-1}}{2h}\right) + \mathcal{O}(h^2),
+\]
+donde:
+\[
+f\left(x_i, y_i, \frac{y_{i+1} - y_{i-1}}{2h} \right) = 6x_i - \left(-x_i y_i \cdot \frac{y_{i+1} - y_{i-1}}{2h} + 3 y_i^2\right).
+\]
+
+Multiplicando por \( h^2 \) y reorganizando:
+\begin{equation}    
+    
+\[
+- y_{i+1} + 2y_i - y_{i-1} + h^2 f\left(x_i, y_i, \frac{y_{i+1} - y_{i-1}}{2h} \right) = 0.
+\]
+\end{equation}
+
+ 
+\section{Condiciones de contorno discretizadas}
+
+\subsection*{Condición 1: \( 3y(0) - 2y'(0) = \alpha \)}
+
+Aproximamos:
+\[
+y'(0) \approx \frac{y_1  - y_{-1}}{2h}.
+\]
+Sustituyendo:
+\[
+3y_0 - 2 \cdot \frac{y_1  - y_{-1}}{2h}= \alpha.
+\]
+Multiplicando por \( h \):
+\[
+ - y_1 + y_{-1} = h \alpha - 3h\cdot y_0.
+\]
+Reordenado:
+\[
+  y_{-1} = h \alpha - 3h \cdot y_0 + y_1\alpha.
+\]
+
+ Reemplazamos: 
+\[
+- y_{1} + 2y_0 -  h \alpha + 3h \cdot y_0 - y_1\alpha + h^2 f\left(x_0, y_0, \frac{y_{i+1} -  h \alpha + 3h \cdot y_0 - y_1\alpha}{2h} \right) = 0.
+\]
+\[
+-2 y_{1} + (2+3h) \cdot y_0 -  h \alpha  + h^2 f\left(x_0, y_0, \frac{ 3 \cdot y_0 - \alpha}{2h} \right) = 0.
+\]
+\subsection*{Condición 2: \( 2y(1) - \frac{1}{3}y'(1) = \beta \)}
+
+Aproximamos:
+\[
+y'_{N+1} \approx \frac{y_{N+2} - y_{N}}{2h}.
+\]
+Sustituyendo:
+\[
+2y_N - \frac{1}{3} \cdot \frac{y_{N+2} - y_{N}}{2h} = \beta.
+\]
+Multiplicando por \( 6h \):
+\[
+12h y_N - (y_{N+2} - y_{N}) = 6h \beta.
+\]
+Reordenado:
+\[
+y_{N+2}=12h \cdot y_{N+1} + y_N - 6h \beta.
+\]
+Reemplazamos:
+\[
+-12h \cdot y_{N+1} - y_N + 6h \beta+2y_{N+1}-y_{N}+ h^2 f(x_{N+1}, y_{N+1},\frac{12y_{N+1}+y_N-6h\beta-y_N}{2h})=0
+\]
+\[
+(2-12h) \cdot y_{N+1} -2 y_N + 6h \beta+ h^2 f(x_{N+1}, y_{N+1},6y_{N+1}-3\beta)=0
+\]
+
+
+\section{Sistema no lineal completo}
+
+El sistema completo es:
+
+\begin{align*}
+F_0(y) &= -2 y_{1} + (2+3h) \cdot y_0 -  h \alpha  + h^2 f\left(x_0, y_0, \frac{ 3 \cdot y_0 - \alpha}{2h} \right) = 0, \\
+F_i(y) &=- y_{i+1} + 2y_i - y_{i-1} + h^2 f\left(x_i, y_i, \frac{y_{i+1} - y_{i-1}}{2h} \right) = 0, \quad i = 1, \dots, N, \\
+F_N(y) &= (2-12h) \cdot y_{N+1} -2 y_N + 6h \beta+ h^2 f(x_{N+1}, y_{N+1},6y_{N+1}-3\beta)=0.
+\end{align*}
+ Este sistema es de N+2 ecuaciones con N+2 incógnitas, cada una está definida de$ \mathbb{R}^{N} \to \mathbb{R}$
+Definimos, $F : \mathbb{R}^{N} \to \mathbb{R}^{N}$ una función vectorial que tiene a las ecuaciones anteriores. Entonces el sistema no lineal se expresa de la forma:
+\[
+  \quad F(y) = \begin{bmatrix} F_0(y) \\ F_1(y) \\ \vdots \\ F_N(y) \end{bmatrix}=0.
+\]
+
+A continuacion, usamos uno de los métodos más conocidos para propocionar soluciones aproximadas a esta sistema, es el método de Newton. 
+
+
+
+\section{Método de Newton para sistemas no lineales}
+
+El método de Newton genera una sucesión de aproximaciones \( y^{(k)} \in \mathbb{R}^{N} \), comenzando desde una aproximación inicial \( y_{0} \), mediante la fórmula:
+
+\[
+y^{(k+1)} = y^{(k)} - \left[ F'(y^{(k)}) \right]^{-1} F(y^{(k)}).
+\]
+donde $ F'(y^{(k)})$ es la matriz Jacobiana asociada a $F$, evaluada en el iterado y para evitar el calculo de la matriz inversa, operación inestable y computacionalmente costosa, resolvemos el sistema lineal:
+
+\[
+F'(y^{(k)}) \cdot z = F(y^{(k)}), 
+\]
+y su solución nos sirve para calcular la iteracion k+1 : } $y^{(k+1)} = y^{(k)} - z$.
+
+
+\subsection*{Criterio de parada}
+
+Se detiene el algoritmo cuando:
+
+\[
+\|  y^{(k+1)-y^{(k)} \| < \varepsilon,
+\]
+para una tolerancia prefijada \( \varepsilon \), o se alcanza el número máximo de iteraciones.
+
+\section{Matriz Jacobiana del sistema \( F'(y) \)}
+
+La matriz jacobiana \( F'(y) \) es tridiagonal, compuesta por derivadas parciales de cada función \( F_i \) respecto a \( x_i, y_i, z_i \).
+\[
+F'(y) = 
+\begin{bmatrix}
+\boxed{2+3h+h^2f'_y+\frac{3}{2}h^2f'_z} & -2 & 0 & 0 & \cdots & 0 & 0 \\
+-1-\frac{h^2}{2}f'_z & 2+h^2f'_y & -1+\frac{h}{2}f'_z & 0 & \cdots & 0 & 0 \\
+
+c_2 & a_2 & b_2 & 0 & \cdots & 0 & 0 \\
+0 & c_3 & a_3 & b_3 & \cdots & 0 & 0 \\
+\vdots & \ddots & \ddots & \ddots & \ddots & \vdots & \vdots \\
+0 & 0 & \cdots & c_{N-2} & a_{N-2} & b_{N-2} & 0 \\
+0 & 0 & \cdots & 0 & 0 & -2 & \boxed{(2-12h)+h^2f'_y+6h^2f'_z}
+\end{bmatrix}
+\]
+
+
+
+\section{Resolución del sistema lineal con método de Crout}
+
+Dado que la matriz jacobiana \( F'(y) \) es tridiagonal, se emplea la descomposición de Crout para resolver eficientemente el sistema lineal, obteniendo \( z\), que luego se suma a \( y^{(k)} \) para obtener la siguiente iteración. Este proceso se repite hasta que se cumpla el criterio de convergencia.
+\subsection{Solución numérica con algoritmo de Crout}
+\begin{table}[H]
+\centering
+\caption{Valores de \(X\), \(Y\) y \(Y'\)}
+\label{tab:datos}
+\begin{tabular}{@{}ccc@{}}
+\toprule
+\(X\)       & \(Y\)       & \(Y'\)      \\ \midrule
+
+0.9100 & 0.7536 & 2.4844 \\
+0.9200 & 0.7787 & 2.5393 \\
+0.9300 & 0.8044 & 2.5948 \\
+0.9400 & 0.8306 & 2.6509 \\
+0.9500 & 0.8574 & 2.7076 \\
+0.9600 & 0.8847 & 2.7649 \\
+0.9700 & 0.9127 & 2.8228 \\
+0.9800 & 0.9412 & 2.8813 \\
+0.9900 & 0.9703 & 2.9404 \\
+1.0000 & 1.0000 & 3.0001 \\ \bottomrule
+\end{tabular}
+\end{table}
+\section{Resolución del sistema lineal con método de Gauss}
+\subsection{Solución numérica con algoritmo de Gauss}
+
+\begin{table}[H]
+\centering
+\caption{Valores de \(X_{\text{Gauss}}\), \(Y_{\text{Gauss}}\) y \(Y'_{\text{Gauss}}\)}
+\label{tab:gauss_data}
+\begin{tabular}{@{}ccc@{}}
+\toprule
+\(X_{\text{Gauss}}\) & \(Y_{\text{Gauss}}\) & \(Y'_{\text{Gauss}}\) \\ \midrule
+
+0.9100  & 0.7536 & 2.4844 \\
+0.9200  & 0.7787 & 2.5393 \\
+0.9300  & 0.8044 & 2.5948 \\
+0.9400  & 0.8306 & 2.6509 \\
+0.9500  & 0.8574 & 2.7076 \\
+0.9600  & 0.8847 & 2.7649 \\
+0.9700  & 0.9127 & 2.8228 \\
+0.9800  & 0.9412 & 2.8813 \\
+0.9900  & 0.9703 & 2.9404 \\
+1.0000  & 1.0000 & 3.0001 \\ \bottomrule
+\end{tabular}
+\end{table}
+
+
+Ambos métodos (Gauss y Crout) son algoritmos directos para resolver sistemas lineales $Ax=b$.
+
+\textbf{Método de Gauss:} Basado en eliminación hacia adelante (triangularización) y sustitución hacia atrás.
+
+\textbf{Método de Crout:} Variante de la factorización $LU$, donde $A=LU$ (descomposición en matrices triangular inferior L y superior U).
+
+Consistencia en los resultados:
+
+Los valores numéricos obtenidos $(Y_{Gauss}, Y_{Crout})$ son idénticos (Tablas 1 y 2), ya que el sistema lineal derivado de la discretización tiene solución única.
+
+La coincidencia se justifica matemáticamente: al ser el sistema compatible determinado, cualquier método exacto (sin errores de redondeo) proporcionará la misma solución.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Captura de pantalla 2025-05-20 222757.png} % Reemplaza con el nombre de tu imagen
+    \caption{Comparación visual de los resultados obtenidos con Gauss y Crout.}
+    \label{fig:comparacion}
+\end{figure}
+\end{document}
